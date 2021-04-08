@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdbool.h>
 #include <string.h>
 
-typedef char[32] word;
+typedef char word[32];
 
 typedef struct {
     int size;  // 現在の配列の要素数
@@ -60,14 +62,14 @@ int main() {
         // 単語が「n」で終わっていたら終了
         if (w[strlen(w) - 1] == 'n')
 		{
-			printf("your word \"%s\" ended with \"n\"", w);
+			printf("ERROR: your word \"%s\" ended with \"n\"\n", w);
 			break ;
 		}
 
         if (list.size > 0) {
-            if (list.data[list.size][strlen(list.data[list.size] - 1)] != w[strlen(w) - 1])
+            if (list.data[list.size - 1][strlen(list.data[list.size - 1]) - 1] != w[0])
 			{
-				printf("please input correct word\n");
+				printf("wrong word\n");
 				continue;
 			} 
         }
@@ -98,6 +100,7 @@ int main() {
             printf(" -> ");
         }
     }
+    printf(" -> %s", w);
     printf("\n");
 
     // メモリ解放

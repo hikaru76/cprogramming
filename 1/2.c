@@ -26,7 +26,6 @@ double	myexp(double const x)
 		while (++i < 100)
 		{
 			ans += each(x, i);
-			printf("%f\n", ans);
 		}
 	else
 		while (++i < 100)
