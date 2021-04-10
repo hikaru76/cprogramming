@@ -174,12 +174,101 @@ bool mat_equal(matrix mat1, matrix mat2) {
 	return (true);
 }
 
+bool is_valid(matrix mat) {
+    return mat.rows > 0 && mat.cols > 0 && mat.elems != NULL;
+}
 // mat_solve: 連立一次方程式 ax=b を解く．ピボット選択付き
-bool mat_solve(matrix *x, matrix A_, matrix b_) {
-	return false;
+bool mat_solve(matrix *x, matrix A, matrix b) {
+	int 	i, j, k;
+	int		tmp;
+	double	r;
+    matrix	A2, b2;
+
+    if (!is_valid(*x) || !is_valid(A) || !is_valid(b)) return false;
+    if (A.cols != x->rows || A.rows != b.rows || x->cols != b.cols) return false;
+
+    // 行列aと行列bの値を書き換えないよう、別の行列を用意する 
+    if (!mat_alloc(&A2, A.rows, A.cols)) return false;
+    if (!mat_alloc(&b2, b.rows, b.cols)) return false;
+
+    // 用意した行列にAとbの値をコピーする。以下、これらの行列を用いて計算する
+    mat_copy(&A2, A);
+    mat_copy(&b2, b);
+
+    /*
+     * ガウスの消去法：
+     * 普通に作れば10行程度。 forループを3つ使う？
+     * 行列式がゼロかどうかの判定も忘れないこと
+     */
+
+	i = -1;
+	while (++i < A2.rows - 1)
+	{
+		tmp = i;
+		j = i;
+		while(++j < A2.rows)
+			if (fabs(mat_elem(A2, j, i)) > fabs(mat_elem(A2, tmp, i)))
+				tmp = j;
+		j = i - 1;
+		while (++j < A2.cols)
+			swap(mat_elem(A2, i, j), mat_elem(A2, tmp, j));
+		j = -1;
+		while (++j < b2.cols)
+			swap(mat_elem(b2, i, j), mat_elem(b2, tmp, j));
+		if (fabs(mat_elem(A2, i, i)) < 1.0e-12) {
+            mat_free(&A2);
+            mat_free(&b2);
+            return (false);
+        }
+		j = i;
+		while (++j < A2.rows)
+		{
+			r = mat_elem(A2, j, i) / mat_elem(A2, i, i);
+			k = i - 1;
+			while (++k < A2.cols)
+				mat_elem(A2, j, k) -= r * mat_elem(A2, i, k);
+			k = -1;
+			while (++k < b2.cols)
+				mat_elem(b2, j, k) -= r * mat_elem(b2, i, k);
+		}
+	}
+    /*
+     *  後退代入：
+     *  普通に作れば5-7行程度。 forループを2つ使う？
+     */
+	i = A2.rows;
+	while (--i >= 0)
+	{
+		j = -1;
+		while (++j < b2.cols)
+		{
+			k = i;
+			while (++k < A2.rows)
+				mat_elem(b2, i, j) -= mat_elem(A2, i, k) * mat_elem(b2, k, j);
+			mat_elem(b2, i, j) /= mat_elem(A2, i, i);
+		}
+	}
+    // 結果を x にコピー
+    mat_copy(x, b2);
+
+    // 終わったらメモリを解放
+    mat_free(&A2);
+    mat_free(&b2);
+
+    return true;
 }
 
 // mat_inverse: 行列Aの逆行列を*invAに与える
 bool mat_inverse(matrix *invA, matrix A) {
-	return false;
+	matrix	tmp;
+	bool	flag;
+
+	if (A.rows != A.cols || invA->cols != A.cols || invA->rows != A.rows)
+		return (false);
+	if (!mat_alloc(&tmp, A.rows, A.cols))
+		return (false);
+	mat_ident(&tmp);
+	flag = mat_solve(invA, A, tmp);
+	mat_free(&tmp);
+	return (flag);
 }
