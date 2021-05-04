@@ -1,30 +1,14 @@
-CC			:= gcc
-RM			:= rm
-SRC			:= power.c matrix.c
-OBJS		:= $(patsubst %.c,%.o,$(SRC))
-DEPS		:= $(patsubst %.c,%.d,$(SRC))
-CFLAGS		:= -O2 -Wall -MP -MMD -pthread
-LDFLAGS		:=
-ifeq ($(shell uname),Darwin)
-CFLAGS		+= -Xpreprocessor -fopenmp
-LDFLAGS		+= -lomp
-else
-CFLAGS		+= -fopenmp
-LDFLAGS		+= -fopenmp
-endif
-OUTPUT		:= power
+CC = gcc-10
+NAME = power
 
-.PHONY: all
-all: $(OUTPUT)
+${NAME}:
+		${CC} power.c matrix.c -fopenmp -o ${NAME}
 
--include $(DEPS)
+all: ${NAME}
 
-$(OUTPUT): $(OBJS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+fclean:
+	rm -rf ${NAME}
 
-%.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+re: fclean all
 
-.PHONY: clean
-clean:
-	$(RM) -f $(OBJS) $(DEPS) $(OUTPUT) $(addsuffix .exe,$(OUTPUT))
+.PHONY: all fclean re%       

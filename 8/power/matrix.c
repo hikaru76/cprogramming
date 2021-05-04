@@ -4,6 +4,14 @@
 // 行列演算用関数群
 // ----------------------------------------------------------------------------
 
+bool is_same_size(matrix mat1, matrix mat2) {
+    return mat1.rows == mat2.rows && mat1.cols == mat2.cols;
+}
+
+bool is_valid(matrix mat) {
+    return mat.rows > 0 && mat.cols > 0 && mat.elems != NULL;
+}
+
 // mat_alloc: 行列要素用のメモリを確保する
 bool mat_alloc(matrix *mat, int rows, int cols) {
 	if (rows <= 0 || cols <= 0)
@@ -77,31 +85,27 @@ bool mat_sub(matrix *res, matrix mat1, matrix mat2) {
 
 // mat_mul: mat2とmat3の行列積を*mat1に代入する
 bool mat_mul(matrix *res, matrix mat1, matrix mat2) {
-	int     i;
-	int     j;
-	int     k;
-	double  val;
-	matrix  tmp;
-	
-	if (mat1.cols != mat2.rows || mat1.rows != res->rows || mat2.cols != res->cols)
-		return (false);
-	i = -1;
-	mat_alloc(&tmp, res->rows, res->cols);
-	while (++i < res->rows)
-	{
-		j = -1;
-		while (++j < res->cols)
-		{
-			val = 0.0;
-			k = -1;
-			while (++k < mat1.cols)
-				val += mat_elem(mat1, i, k) * mat_elem(mat2, k, j);
-			mat_elem(tmp, i, j) = val;
-		}
-	}
-	mat_copy(res, tmp);
-	mat_free(&tmp);
-	return (true);
+	if (!is_valid(*res) || !is_valid(mat1) || !is_valid(mat2)) return false;
+    if (res->rows != mat1.rows || mat1.cols != mat2.rows || res->cols != mat2.cols) return false;
+
+    matrix temp;
+    if (!mat_alloc(&temp, res->rows, res->cols)) return false;
+
+
+    #pragma omp parallel for
+    for (int i = 0; i < res->rows; i++) {
+        for (int j = 0; j < res->cols; j++) {
+            mat_elem(temp, i, j) = 0.0;
+            for (int k = 0; k < mat1.cols; k++) {
+                mat_elem(temp, i, j) += mat_elem(mat1, i, k) * mat_elem(mat2, k, j);
+            }
+        }        
+    }
+    
+    mat_copy(res, temp);
+    mat_free(&temp);
+    
+    return true;
 }
 
 // mat_muls: mat2をc倍（スカラー倍）した結果を*mat1に代入する
@@ -174,86 +178,80 @@ bool mat_equal(matrix mat1, matrix mat2) {
 	return (true);
 }
 
-bool is_valid(matrix mat) {
-    return mat.rows > 0 && mat.cols > 0 && mat.elems != NULL;
-}
 // mat_solve: 連立一次方程式 ax=b を解く．ピボット選択付き
-bool mat_solve(matrix *x, matrix A, matrix b) {
-	int 	i, j, k;
-	int		tmp;
-	double	r;
-    matrix	A2, b2;
+bool mat_solve(matrix *x, matrix A_, matrix b_) {
+	static const double epsilon = 1.0e-12;
 
-    if (!is_valid(*x) || !is_valid(A) || !is_valid(b)) return false;
-    if (A.cols != x->rows || A.rows != b.rows || x->cols != b.cols) return false;
+    if (!is_valid(*x) || !is_valid(A_) || !is_valid(b_)) return false;
+    if (A_.cols != x->rows || A_.rows != b_.rows || x->cols != b_.cols) return false;
 
-    // 行列aと行列bの値を書き換えないよう、別の行列を用意する 
-    if (!mat_alloc(&A2, A.rows, A.cols)) return false;
-    if (!mat_alloc(&b2, b.rows, b.cols)) return false;
+    // 行列Aと行列bの値を書き換えないよう，別の行列を用意する
+    matrix A, b;
+    if (!mat_alloc(&A, A_.rows, A_.cols)) return false;
+    if (!mat_alloc(&b, b_.rows, b_.cols)) return false;
+    mat_copy(&A, A_);
+    mat_copy(&b, b_);
 
-    // 用意した行列にAとbの値をコピーする。以下、これらの行列を用いて計算する
-    mat_copy(&A2, A);
-    mat_copy(&b2, b);
-
-    /*
-     * ガウスの消去法：
-     * 普通に作れば10行程度。 forループを3つ使う？
-     * 行列式がゼロかどうかの判定も忘れないこと
-     */
-
-	i = -1;
-	while (++i < A2.rows - 1)
-	{
-		tmp = i;
-		j = i;
-		while(++j < A2.rows)
-			if (fabs(mat_elem(A2, j, i)) > fabs(mat_elem(A2, tmp, i)))
-				tmp = j;
-		j = i - 1;
-		while (++j < A2.cols)
-			swap(mat_elem(A2, i, j), mat_elem(A2, tmp, j));
-		j = -1;
-		while (++j < b2.cols)
-			swap(mat_elem(b2, i, j), mat_elem(b2, tmp, j));
-		if (fabs(mat_elem(A2, i, i)) < 1.0e-12) {
-            mat_free(&A2);
-            mat_free(&b2);
-            return (false);
+    
+    // ガウスの消去法
+    int pivot = 0;
+    for (int i = 0; i < A.rows - 1; i++) {
+        // ピボット選択
+        pivot = i;
+        for (int j = i + 1; j < A.rows; j++) {
+            if (fabs(mat_elem(A, pivot, i)) < fabs(mat_elem(A, j, i))) {
+                pivot = j;
+            }
         }
-		j = i;
-		while (++j < A2.rows)
-		{
-			r = mat_elem(A2, j, i) / mat_elem(A2, i, i);
-			k = i - 1;
-			while (++k < A2.cols)
-				mat_elem(A2, j, k) -= r * mat_elem(A2, i, k);
-			k = -1;
-			while (++k < b2.cols)
-				mat_elem(b2, j, k) -= r * mat_elem(b2, i, k);
-		}
-	}
-    /*
-     *  後退代入：
-     *  普通に作れば5-7行程度。 forループを2つ使う？
-     */
-	i = A2.rows;
-	while (--i >= 0)
-	{
-		j = -1;
-		while (++j < b2.cols)
-		{
-			k = i;
-			while (++k < A2.rows)
-				mat_elem(b2, i, j) -= mat_elem(A2, i, k) * mat_elem(b2, k, j);
-			mat_elem(b2, i, j) /= mat_elem(A2, i, i);
-		}
-	}
-    // 結果を x にコピー
-    mat_copy(x, b2);
 
-    // 終わったらメモリを解放
-    mat_free(&A2);
-    mat_free(&b2);
+        // 行の入れ替え
+        #pragma omp parallel for
+        for (int j = i; j < A.cols; j++) {
+            swap(mat_elem(A, i, j), mat_elem(A, pivot, j));
+        }
+
+        #pragma omp parallel for
+        for (int j = 0; j < b.cols; j++) {
+            swap(mat_elem(b, i, j), mat_elem(b, pivot, j));
+        }
+
+        // それでもピボットが0ならば特異行列
+        if (fabs(mat_elem(A, i, i)) < epsilon) {
+            fprintf(stderr, "[ ERROR ] matrix is singular!\n");
+            mat_free(&A);
+            mat_free(&b);
+            return false;
+        }
+
+        // ピボットより下の行を消去する
+        #pragma omp parallel for
+        for (int j = i + 1; j < A.rows; j++) {
+            const double ratio = mat_elem(A, j, i) / mat_elem(A, i, i);
+            for (int k = i; k < A.cols; k++) {
+                mat_elem(A, j, k) -= ratio * mat_elem(A, i, k);
+            }
+
+            for (int k = 0; k < b.cols; k++) {
+                mat_elem(b, j, k) -= ratio * mat_elem(b, i, k);
+            }
+        }
+    }
+
+    #pragma omp parallel for
+    // 後退代入
+    for (int i = A.rows - 1; i >= 0; i--) {
+        
+        for (int k = 0; k < b.cols; k++) {
+            for (int j = i + 1; j < A.rows; j++) {
+                mat_elem(b, i, k) -= mat_elem(A, i, j) * mat_elem(b, j, k);
+            }
+            mat_elem(b, i, k) /= mat_elem(A, i, i);
+        }
+    }
+
+    mat_copy(x, b);
+    mat_free(&A);
+    mat_free(&b);
 
     return true;
 }

@@ -37,7 +37,31 @@ double power_method(matrix A, matrix *x) {
         mat_elem(*x, i, 0) = rand_() / (double)RAND_MAX;
     }
 
-    return 0.0;
+    matrix y;
+
+    mat_alloc(&y, x->rows, x->cols);
+    for(int k = 0; k < 100; k++){
+        mat_mul(&y, A, *x);
+        // yを正規化
+        matrix y_t;
+        mat_alloc(&y_t, y.cols, y.rows);
+        mat_trans(&y_t, y);
+        matrix norm;
+        mat_alloc(&norm, 1, 1);
+        mat_mul(&norm, y_t, y);
+        mat_muls(x, y, 1.0/sqrt(mat_elem(norm,0,0)));
+    }
+    // λを求める
+    matrix x_t;
+    mat_alloc(&x_t, x->cols, x->rows);
+    mat_trans(&x_t, *x);
+    matrix x2_t;
+    mat_alloc(&x2_t, x->cols, x->rows);
+    mat_mul(&x2_t, x_t, A);
+    matrix lambda;
+    mat_alloc(&lambda, 1, 1);
+    mat_mul(&lambda, x2_t, *x);
+    return mat_elem(lambda,0,0);
 }
 
 // 逆べき乗法
@@ -50,7 +74,31 @@ double inv_power_method(matrix A, matrix *x) {
         mat_elem(*x, i, 0) = rand_() / (double)RAND_MAX;
     }
 
-    return 0.0;
+    matrix y;
+    
+    mat_alloc(&y, x->rows, x->cols);
+    for(int k = 0; k < 100; k++){
+        mat_solve(&y, A, *x);
+        // yを正規化
+        matrix y_t;
+        mat_alloc(&y_t, y.cols, y.rows);
+        mat_trans(&y_t, y);
+        matrix norm;
+        mat_alloc(&norm, 1, 1);
+        mat_mul(&norm, y_t, y);
+        mat_muls(x, y, 1.0/sqrt(mat_elem(norm,0,0)));
+    }
+    // λを求める
+    matrix x_t;
+    mat_alloc(&x_t, x->cols, x->rows);
+    mat_trans(&x_t, *x);
+    matrix x2_t;
+    mat_alloc(&x2_t, x->cols, x->rows);
+    mat_mul(&x2_t, x_t, A);
+    matrix lambda;
+    mat_alloc(&lambda, 1, 1);
+    mat_mul(&lambda, x2_t, *x);
+    return mat_elem(lambda,0,0);
 }
 
 void test_simple() {

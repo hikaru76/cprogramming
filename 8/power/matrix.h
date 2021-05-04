@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 // 要素を交換するマクロ
 #define swap(a, b) do { \
