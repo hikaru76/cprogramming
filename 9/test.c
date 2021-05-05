@@ -11,10 +11,7 @@ void init() {
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
-void display() {
-    // ウィンドウ表示内容のクリア
-    glClear(GL_COLOR_BUFFER_BIT);
-
+void draw_s() {
 	//S
 	glColor3d(1.0, 0.0, 0.0);
 	glLineWidth(10.0);
@@ -31,8 +28,10 @@ void display() {
 	glVertex2d(50, 280);
 	glEnd();
 	glLineWidth(1.0);
+}
 
-    //H(長方形と直線を使って)
+void draw_h() {
+	//H(長方形と直線を使って)
     glColor3d(0.0, 1.0, 0.0);
     glRectd(260, 20, 480, 240);
 	glColor3d(0.0, 0.0, 0.0);
@@ -45,7 +44,9 @@ void display() {
 	glVertex2d(470, 125);
 	glEnd();
 	glLineWidth(1.0);
+}
 
+void draw_star() {
 	//星
 	glColor3d(1.0, 1.0, 0.0);
 	glBegin(GL_POLYGON);  
@@ -80,7 +81,9 @@ void display() {
     glVertex2d(40, 145);
     glVertex2d(100, 150);
 	glEnd();
+}
 
+void draw_kirby() {
 	//カービィ https://www.pinterest.jp/pin/661325526506360617/
 	int kirbymap[26][29] = 	{
 	{0,0,0,0,0, 0,0,0,0,0, 0,1,1,1,1, 1,1,1,0,0, 0,0,0,0,0, 0,0,0,0},
@@ -138,6 +141,15 @@ void display() {
     		glEnd();
 		}
 	}
+}
+
+void display() {
+    // ウィンドウ表示内容のクリア
+    glClear(GL_COLOR_BUFFER_BIT);
+	draw_s();
+	draw_h();
+	draw_star();
+	draw_kirby();
     glFlush();
 }
 
