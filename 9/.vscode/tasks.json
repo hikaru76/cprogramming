@@ -1,0 +1,24 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc-10 アクティブなファイルのビルド",
+            "command": "/opt/homebrew/bin/gcc-10",
+            "args": [
+                "O2 -Wall -MP -MMD -I../include -DGL_SILENCE_DEPRECATION -framework OpenGL -framework GLUT draw_curves_list.c matrix.c"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "デバッガーによって生成されたタスク。"
+        }
+    ],
+    "version": "2.0.0"
+}
