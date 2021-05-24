@@ -30,7 +30,7 @@ int	least_square(matrix *a, matrix points, int order)
 			}
 			mat_elem(k, i, j) = tmp;
 			mat_elem(q, i, 0) = tmp2;
-			printf("%lf %lf %lf %lf\n", tmp, mat_elem(k, i, j), tmp2, mat_elem(q, i, 0));
+			// printf("%lf %lf %lf %lf\n", tmp, mat_elem(k, i, j), tmp2, mat_elem(q, i, 0));
 		}
 	}
 	if (mat_solve(a, k, q))
