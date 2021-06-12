@@ -52,7 +52,7 @@ int main() {
         x = x + h;
         y_true = answer(x);
         error += (y_true - y) * (y_true - y);
-        printf("%f %f %f\n", x, y, y_true);
+        //printf("%f %f %f\n", x, y, y_true);
     }
     error = sqrt(error / N);
     printf("euler2's Error: %.8f\n", error);
@@ -65,7 +65,7 @@ int main() {
         x = x + h;
         y_true = answer(x);
         error += (y_true - y) * (y_true - y);
-        printf("%f %f %f\n", x, y, y_true);
+        //printf("%f %f %f\n", x, y, y_true);
     }
     error = sqrt(error / N);
     printf("heun's Error: %.8f\n", error);
@@ -78,7 +78,7 @@ int main() {
         x = x + h;
         y_true = answer(x);
         error += (y_true - y) * (y_true - y);
-        printf("%f %f %f\n", x, y, y_true);
+        //printf("%f %f %f\n", x, y, y_true);
     }
     error = sqrt(error / N);
     printf("eulerb's Error: %.8f\n", error);
@@ -91,7 +91,7 @@ int main() {
         x = x + h;
         y_true = answer(x);
         error += (y_true - y) * (y_true - y);
-        printf("%f %f %f\n", x, y, y_true);
+        //printf("%f %f %f\n", x, y, y_true);
     }
     error = sqrt(error / N);
     printf("eulerf's Error: %.8f\n", error);
@@ -104,7 +104,7 @@ int main() {
            x = x + h;
            y_true = answer(x);
            error += (y_true - y) * (y_true - y);
-           printf("%f %f %f\n", x, y, y_true);
+           //printf("%f %f %f\n", x, y, y_true);
        }
        error = sqrt(error / N);
        printf("runge's Error: %.8f\n", error);

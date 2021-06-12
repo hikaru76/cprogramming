@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include "matrix.h"
-//課題5はやっていない、課題3、4はなんか微妙。式はあっていそうな気がする（気がするだけ）
+
 void f(double x, matrix y, matrix *dxdy) {
 	matrix dxdy_;
 	//x = k/m 2階微分を行っている。高階微分方程式の章の式。

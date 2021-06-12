@@ -1,4 +1,4 @@
-CC = gcc-10
+CC = gcc-11
 NAME = power
 
 ${NAME}:
