@@ -1,5 +1,5 @@
 all:
-	gcc-10 -framework OpenGL -framework GLUT test.c
+	gcc-11 -framework OpenGL -framework GLUT test.c
 
 fclean:
 	rm -rf a.out

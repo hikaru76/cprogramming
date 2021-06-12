@@ -28,7 +28,7 @@
 # 	$(RM) -f $(DEPS) $(OBJS) $(OUTPUT) $(addsuffix .exe,$(OUTPUT))
 
 all:
-	gcc-10 -O2 -Wall -MP -MMD -I../include -DGL_SILENCE_DEPRECATION -framework OpenGL -framework GLUT draw_curves.c matrix.c
+	gcc-11 -O2 -Wall -MP -MMD -I../include -DGL_SILENCE_DEPRECATION -framework OpenGL -framework GLUT draw_curves.c matrix.c
 
 clean:
 	rm -rf *.d
