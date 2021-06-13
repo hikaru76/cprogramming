@@ -10,5 +10,5 @@ fclean:
 2:
 	gcc-11 -framework OpenGL -framework GLUT 2.c
 
-anime:
-	gcc-11 -framework OpenGL -framework GLUT anim_sample.c
+3:
+	gcc-11 -framework OpenGL -framework GLUT 3.c
