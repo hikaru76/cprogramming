@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 int WINDOW_WIDTH = 500;   // ウィンドウの横幅
 int WINDOW_HEIGHT = 500;  // ウィンドウの高さ
@@ -22,10 +23,12 @@ int g_flag = 0; //四角の色（0なら緑1なら赤）
 void display() {
     // ウィンドウ表示内容のクリア
     glClear(GL_COLOR_BUFFER_BIT);
-    if (g_flag)
+    if (g_flag == 0)
+        glColor3d(1.0, 0.0, 0.0);
+    else if (g_flag == 1)
         glColor3d(0.0, 1.0, 0.0);
     else
-        glColor3d(1.0, 0.0, 0.0);
+        glColor3d(0.0, 0.0, 1.0);
 
     // 正方形の4つ角の位置を計算
     // double scale = (cos(TIME / 18.0) + 1.0) * 0.5;
@@ -75,10 +78,8 @@ void mouse(int button, int state, int x, int y) {
     }
     else if (PRESS_BUTTON == GLUT_RIGHT_BUTTON) {
         PRESS_BUTTON = button;
-        if (g_flag)
-            g_flag = 0;
-        else
-            g_flag = 1;
+       PREV_X = -10;
+       PREV_Y = -10;
     }
     //ボタンが離されたらボタンの記憶をクリアする
     if (state == GLUT_UP) {
@@ -102,6 +103,19 @@ void motion(int x, int y) {
     }
 }
 
+void keyboard(unsigned char key, int x, int y) {
+    printf("%d\n", key);
+	if (key == 'r') {
+		g_flag = 0;
+	} else if (key == 'g') {
+		g_flag = 1;
+	} else if (key == 'b') {
+		g_flag = 2;
+	} else if (key == '\e') {
+		exit(1);
+	}
+}
+
 int main(int argc, char **argv) {
     // GLUTの初期化
     glutInit(&argc, argv);
@@ -120,6 +134,7 @@ int main(int argc, char **argv) {
     // マウス関係のコールバック関数
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
+	glutKeyboardFunc(keyboard);
     // 描画ループの開始
     glutMainLoop();
 }
