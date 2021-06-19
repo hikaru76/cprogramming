@@ -39,7 +39,7 @@ float goal_w = 4.2; //ゴールまで水平距離
 float goal_r = 0.03; //ゴール内径
 float goal_R = 0.2425; //ゴール外径
 float ball_r = 0.1225; //ボール半径
-float e = 0.4; //ゴール衝突の際の反発係数
+float e = 0.25; //ゴール衝突の際の反発係数
 float g = 9.8; //重力加速度
 float before_x = 0.0; //直前ボールx座標
 float before_y = 0.0; //直前ボールy座標
@@ -67,18 +67,18 @@ static const float CAMERA_POS[3] = { -10.0f, 4.0f, 8.0f };
 int check_bound() {
     if ((goal_w - goal_r - x) * (goal_w - goal_r - x) + (goal_h - y) * (goal_h - y) < ball_r * ball_r ||
         (goal_w + goal_r - x) * (goal_w + goal_r - x) + (goal_h - y) * (goal_h - y) < ball_r * ball_r)
+	{
+		attacked = -10;
         return (1);
+	}
     return (0);
 }
 
 //ボールのゴール通過判定 
 int check_flag(int number) {
     int h_flag = goal_h + 0.05 ? number == 1 : goal_h - 0.05; //ゴールに入った判定をゴール鉛直方向±5cmの地点で行う
-    if (goal_w - goal_r < x - ball_r && goal_w + goal_r > x + ball_r && abs(h_flag - y) < 0.01)
-	{
-		attacked = -100;
+    if (goal_w - goal_r < x - ball_r && goal_w + goal_r > x + ball_r && abs(h_flag - y) < 0.05)
         return (1);
-	}
     return (0);
 }
 
@@ -172,10 +172,16 @@ void display() {
 	glutSolidTorus(goal_r, goal_R, 20, 20);
 	glPopMatrix();
 	
-	if (check_bound() && attacked == 0)
+	if (attacked == 0 && check_bound())
 		calculate_confliction();
 	if (attacked < 0)
 		attacked++;
+	if (flag1 == 0)
+		flag1 = check_flag(1);
+	if (flag1 == 1 && flag2 == 0)
+		flag2 = check_flag(2);
+	if (flag1 && flag2)
+		printf("Clear!");
 	calculate();
 	glPushMatrix();
 	glTranslated(x, y, 0.0);
