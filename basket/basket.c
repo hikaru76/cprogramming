@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 float goal_h = 3.05; //ゴール高さ
 float goal_w = 4.2; //ゴールまで水平距離
@@ -8,8 +9,8 @@ float goal_r = 0.225; //ゴール半径
 float ball_r = 0.1225; //ボール半径
 float e = 0.1; //ゴール衝突の際の反発係数
 float g = 9.8; //重力加速度
-float x0 = 0.0; //直前ボールx座標
-float y0 = 0.0; //直前ボールy座標
+float before_x = 0.0; //直前ボールx座標
+float before_y = 0.0; //直前ボールy座標
 float x = 0.0; //今回ボールx座標
 float y = 0.0; //今回ボールy座標
 float dx = 0.0; //移動距離x
@@ -22,7 +23,7 @@ float v0y = 0.0; //ボールy方向初速度
 float theta = 0.0; //初期打ち上げ角度
 int flag1 = 0; //ゴール上面通過フラグ
 int flag2 = 0; //ゴール下面通過フラグ
-float dt = 0.1;
+float dt = 0.1; //更新間隔
 
 //ボールとゴールリングとの衝突判定
 int check_bound() {
@@ -48,15 +49,14 @@ void calculate_confliction() {
 
 //毎フレーム速度位置計算
 void calculate() {
-    x0 = x;
-    y0 = y;
+    before_x = x;
+    before_y = y;
     vx = vx;
     vy = vy - g * dt;
     dx = vx * dt;
     dy = vy * dt;
-    x = x0 + dx;
-    y = y0 + dy;
-    printf("%f %f", x, y);
+    x = before_x + dx;
+    y = before_y + dy;
 }
 
 //./basket v0 theta
@@ -67,8 +67,10 @@ int main(int argc, char **argv) {
         return (1);
     }
     theta = atof(argv[2]);
-    v0x = atof(argv[1]) * cos(theta);
-    v0y = atof(argv[0]) * sin(theta);
+    v0x = atof(argv[1]) * cos(theta * 3.1415 / 180.0);
+    v0y = atof(argv[1]) * sin(theta * 3.1415 / 180.0);
+    vx = v0x;
+    vy = v0y;
     for (int i = 0; i < 100; i++) {
         calculate();
     }
