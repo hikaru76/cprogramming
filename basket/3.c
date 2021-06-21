@@ -55,8 +55,9 @@ float v0y = 0.0; //ボールy方向初速度
 float theta = 0.0; //初期打ち上げ角度
 int flag1 = 0; //ゴール上面通過フラグ
 int flag2 = 0; //ゴール下面通過フラグ
-// float dt = 0.03; //更新間隔
-float dt = 0.01;
+int flag3 = 0; //クリア告知フラグ
+int clear_after = 0; //クリア後画面消去までの管理
+float dt = 0.03; //更新間隔
 int attacked = 0;
 
 // カメラの位置
@@ -78,7 +79,7 @@ int check_bound() {
 //ボールのゴール通過判定 
 int check_flag(int number) {
     float h_flag = number == 1 ? goal_h + 0.001 : goal_h - 0.001; //ゴールに入った判定をゴール鉛直方向±1cmの地点で行う
-	printf("%f, %f, %f, %f, %f\n", goal_w-goal_R+goal_r*2, x-ball_r, goal_w+goal_R-goal_r*2, x+ball_r, h_flag-y);
+	// printf("%f, %f, %f, %f, %f\n", goal_w-goal_R+goal_r*2, x-ball_r, goal_w+goal_R-goal_r*2, x+ball_r, h_flag-y);
 	// printf("h_flag:%f\n", h_flag);
     if ((goal_w - goal_R + goal_r * 2 < x - ball_r) && goal_w + goal_R - goal_r * 2 > x + ball_r && abs(h_flag - y) < 0.001)
         return (1);
@@ -187,8 +188,17 @@ void display() {
 		// printf("%f, %f\n", goal_w - goal_R, x - ball_r);
 		flag2 = check_flag(2);
 	}
-	if (flag1 && flag2)
+	if (flag1 && flag2 && !flag3)
+	{
+		flag3 = 1;
 		printf("Clear!");
+	}
+	if (y == 0)
+		clear_after++;
+	if (flag3)
+		clear_after++;
+	if (clear_after >= 80)
+		exit(0);
 	calculate();
 	glPushMatrix();
 	glTranslated(x, y, 0.0);
