@@ -55,7 +55,8 @@ float v0y = 0.0; //ボールy方向初速度
 float theta = 0.0; //初期打ち上げ角度
 int flag1 = 0; //ゴール上面通過フラグ
 int flag2 = 0; //ゴール下面通過フラグ
-float dt = 0.03; //更新間隔
+// float dt = 0.03; //更新間隔
+float dt = 0.01;
 int attacked = 0;
 
 // カメラの位置
@@ -65,8 +66,8 @@ static const float CAMERA_POS[3] = { -10.0f, 4.0f, 8.0f };
 
 //ボールとゴールリングとの衝突判定
 int check_bound() {
-    if ((goal_w - goal_r - x) * (goal_w - goal_r - x) + (goal_h - y) * (goal_h - y) < ball_r * ball_r ||
-        (goal_w + goal_r - x) * (goal_w + goal_r - x) + (goal_h - y) * (goal_h - y) < ball_r * ball_r)
+    if ((goal_w - goal_R - x) * (goal_w - goal_R - x) + (goal_h - y) * (goal_h - y) <= ball_r * ball_r + goal_r * goal_r ||
+        (goal_w + goal_R - x) * (goal_w + goal_R - x) + (goal_h - y) * (goal_h - y) <= ball_r * ball_r + goal_r * goal_r)
 	{
 		attacked = -10;
         return (1);
@@ -76,8 +77,10 @@ int check_bound() {
 
 //ボールのゴール通過判定 
 int check_flag(int number) {
-    int h_flag = goal_h + 0.05 ? number == 1 : goal_h - 0.05; //ゴールに入った判定をゴール鉛直方向±5cmの地点で行う
-    if (goal_w - goal_r < x - ball_r && goal_w + goal_r > x + ball_r && abs(h_flag - y) < 0.05)
+    float h_flag = number == 1 ? goal_h + 0.001 : goal_h - 0.001; //ゴールに入った判定をゴール鉛直方向±1cmの地点で行う
+	printf("%f, %f, %f, %f, %f\n", goal_w-goal_R+goal_r*2, x-ball_r, goal_w+goal_R-goal_r*2, x+ball_r, h_flag-y);
+	// printf("h_flag:%f\n", h_flag);
+    if ((goal_w - goal_R + goal_r * 2 < x - ball_r) && goal_w + goal_R - goal_r * 2 > x + ball_r && abs(h_flag - y) < 0.001)
         return (1);
     return (0);
 }
@@ -174,12 +177,16 @@ void display() {
 	
 	if (attacked == 0 && check_bound())
 		calculate_confliction();
+	// printf("%i %i\n", flag1, flag2);
 	if (attacked < 0)
 		attacked++;
 	if (flag1 == 0)
 		flag1 = check_flag(1);
 	if (flag1 == 1 && flag2 == 0)
+	{
+		// printf("%f, %f\n", goal_w - goal_R, x - ball_r);
 		flag2 = check_flag(2);
+	}
 	if (flag1 && flag2)
 		printf("Clear!");
 	calculate();
@@ -370,6 +377,7 @@ int main(int argc, char **argv) {
     }
 	av[0] = strdup(argv[1]);
 	av[1] = strdup(argv[2]);
+	flag1 = flag2 = 0;
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
