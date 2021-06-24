@@ -104,7 +104,7 @@ void motion(int x, int y) {
 }
 
 void keyboard(unsigned char key, int x, int y) {
-    printf("%d\n", key);
+    // printf("%d\n", key);
 	if (key == 'r') {
 		g_flag = 0;
 	} else if (key == 'g') {
